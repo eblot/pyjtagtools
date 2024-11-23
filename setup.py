@@ -168,6 +168,8 @@ def main():
         package_dir={'': '.'},
         classifiers=CLASSIFIERS,
         python_requires='>=3.9',
+        long_description=read_desc('jtagtools/doc/index.rst'),
+        long_description_content_type='text/x-rst'
     )
 
 

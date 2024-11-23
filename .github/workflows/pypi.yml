@@ -4,6 +4,12 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      twine_verbose:
+        description: 'Enable Twine verbose mode'
+        required: true
+        type: boolean
 
 jobs:
   pypi-publish:
@@ -38,4 +44,4 @@ jobs:
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-          verbose: true
+          verbose: ${{ twine_verbose }}

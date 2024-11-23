@@ -1,0 +1,11 @@
+*.egg-info
+*.pyc
+*.pyo
+**/.DS_Store
+MANIFEST
+dist/
+build/
+sphinx/
+.vscode/
+.venv/
+.zed/

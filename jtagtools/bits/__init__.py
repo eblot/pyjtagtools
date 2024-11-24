@@ -21,7 +21,7 @@ class BitSequenceError(Exception):
     """
 
 
-BitSequenceInitializer = Union['BitSequence', str, int, bytes, bytearray,
+BitSequenceInitializer = Union['BitSequence', str, int, memoryview,
                                Iterable[int], Iterable[bool], None]
 """Supported types to initialize a BitSequence."""
 
@@ -154,7 +154,7 @@ class BitSequence:
         return bseq
 
     @classmethod
-    def from_bytes(cls, value: Union[bytes, bytearray]) -> 'BitSequence':
+    def from_bytes(cls, value: memoryview) -> 'BitSequence':
         """Instanciate a BitSequence from a sequence of bytes, one bit for each
            input byte.
 
@@ -164,8 +164,8 @@ class BitSequence:
         return cls.from_iterable(value)
 
     @classmethod
-    def from_bytestream(cls, value: Union[bytes, bytearray],
-                        lsbyte: bool = False) -> 'BitSequence':
+    def from_bytestream(cls, value: memoryview, lsbyte: bool = False) \
+            -> 'BitSequence':
         """Instanciate a BitSequence from a sequence of bytes, 8 bits for each
            input byte.
 

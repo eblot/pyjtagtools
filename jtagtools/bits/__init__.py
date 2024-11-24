@@ -35,7 +35,7 @@ class BitSequence:
        Bit sequence objects are iterable.
 
        :param value:  initial value
-       :param width: count of signficant bits in the bit sequence
+       :param width: count of significant bits in the bit sequence
 
        >>> BitSequence()
        []
@@ -1003,8 +1003,8 @@ class BitSequence:
 
         >>> bs[-3:] = [0, 1, 1]
 
-        #>> bs
-        #[1, 0, 1, 1, 0, 0, 1, 1]
+        >>> bs
+        [1, 0, 1, 1, 0, 0, 1, 1]
 
         >>> bs = BitSequence(0, 8)
 

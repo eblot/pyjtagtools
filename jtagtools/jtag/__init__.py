@@ -7,3 +7,4 @@
 
 from .controller import JtagController
 from .engine import JtagEngine
+from .error import JtagError

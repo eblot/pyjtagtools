@@ -36,15 +36,23 @@ class JtagEngine:
         return self._ctrl
 
     def reset(self) -> None:
-        """Reset the attached TAP controller"""
-        self._ctrl.reset()
+        """Reset the attached TAP controller."""
+        self._ctrl.tap_reset()
         self._fsm.reset()
 
     def get_available_statenames(self):
-        """Return a list of supported state name"""
+        """Return a list of supported state names."""
         return [str(s) for s in self._fsm.states]
 
-    def change_state(self, statename) -> BitSequence:
+    def scan(self) -> BitSequence:
+        """Perform a JTAG scan, where all buffered TDI bits are sent and
+           incoming TDO bits are returned.
+
+           :return: the received TDO bits.
+        """
+        return self._ctrl.scan()
+
+    def change_state(self, statename, read_tdo: bool = False) -> None:
         """Advance the TAP controller to the defined state"""
         transition = (self._fsm.state.name, statename)
         if transition not in self._tr_cache:
@@ -59,52 +67,49 @@ class JtagEngine:
             # transition already in cache
             events = self._tr_cache[transition]
         # update the remote device tap controller (write TMS consumes the seq)
-        bseq = self._ctrl.write_tms(events.copy())
-        self._log.debug('change state to %s: %s', statename, bseq)
+        self._ctrl.write_tms(events.copy(), read_tdo)
+        self._log.debug('change state to %s', statename)
         # update the current state machine's state
         self._fsm.handle_events(events.copy())
-        return bseq
 
     def go_idle(self) -> None:
-        """Change the current TAP controller to the IDLE state"""
+        """Schedule the TAP controller to go to the IDLE state."""
         self.change_state('run_test_idle')
 
     def run(self) -> None:
-        """Change the current TAP controller to the IDLE state"""
+        """Schedule the TAP controller to go to the IDLE state."""
         self.change_state('run_test_idle')
 
     def capture_ir(self) -> None:
-        """Capture the current instruction from the TAP controller"""
+        """Schedule the capture of the current instruction from the TAP
+           controller."""
         self.change_state('capture_ir')
 
     def write_ir(self, instruction: BitSequence) -> None:
-        """Change the current instruction of the TAP controller"""
+        """Schedule an instruction to be sent to the TAP controller."""
         self.change_state('shift_ir')
         self._ctrl.write(instruction)
         self.change_state('update_ir')
 
     def capture_dr(self) -> None:
-        """Capture the current data register from the TAP controller"""
+        """Schedule the current data register of the TAP controller to be
+           read."""
         self.change_state('capture_dr')
 
     def write_dr(self, data: BitSequence) -> None:
-        """Change the data register of the TAP controller"""
+        """Schedule data to be written to the TAP controller."""
         self.change_state('shift_dr')
         self._ctrl.write(data)
         self.change_state('update_dr')
 
-    def read_dr(self, length: int) -> BitSequence:
-        """Read the data register from the TAP controller"""
+    def read_dr(self, length: int) -> None:
+        """Schedule data register to be retrieved from the TAP controller."""
         self.change_state('shift_dr')
-        data = self._ctrl.read(length-1)
-        bseq = self.change_state('update_dr')
-        data.push_left(bseq.pop_right(1))
-        return data
+        self._ctrl.read(length-1)
+        self.change_state('update_dr', True)
 
-    def exchange_dr(self, data: BitSequence) -> BitSequence:
-        """Change the data register of the TAP controller and retrieve
-           previous DR content."""
+    def exchange_dr(self, data: BitSequence) -> None:
+        """Schedule data register content exchange."""
         self.change_state('shift_dr')
-        data = self._ctrl.exchange(data)
-        self.change_state('update_dr')
-        return data
+        self._ctrl.exchange(data)
+        self.change_state('update_dr', True)

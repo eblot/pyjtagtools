@@ -28,7 +28,12 @@ class JtagController:
     def quit(self) -> None:
         """Terminate session."""
 
-    def write_tms(self, modesel: BitSequence) -> BitSequence:
+    def scan(self) -> BitSequence:
+        """Flush output buffer and read back the requested BitSequence.
+        """
+        raise NotImplementedError('ABC')
+
+    def write_tms(self, modesel: BitSequence, read_tdo: bool = False) -> None:
         """Change the TAP controller state.
 
            :note: modesel content may be consumed, i.e. emptied
@@ -36,11 +41,12 @@ class JtagController:
                   request
 
            :param modesel: the bit sequence of TMS bits to clock in
-           :return: the received TDO bits
+           :param read_tdo: whether to read back the TDO bit on the first CLK
+                            cycle of the TMS sequence
         """
         raise NotImplementedError('ABC')
 
-    def write(self, out: BitSequence):
+    def write(self, out: BitSequence) -> None:
         """Write a sequence of bits to TDI.
 
            :note: out content may be consumed, i.e. emptied
@@ -48,12 +54,11 @@ class JtagController:
         """
         raise NotImplementedError('ABC')
 
-    def read(self, length: int) -> BitSequence:
+    def read(self, length: int) -> None:
         """Read out a sequence of bits from TDO.
 
            :param length: the number of bits to clock out from the remote
                           device
-           :return: the received TDO bits (length-long)
         """
         raise NotImplementedError('ABC')
 

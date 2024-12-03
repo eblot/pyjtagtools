@@ -1,6 +1,5 @@
 *.egg-info
-*.pyc
-*.pyo
+**/__pycache__
 **/.DS_Store
 MANIFEST
 dist/
@@ -9,3 +8,4 @@ sphinx/
 .vscode/
 .venv/
 .zed/
+.ropeproject/

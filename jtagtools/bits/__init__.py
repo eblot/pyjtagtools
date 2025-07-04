@@ -7,6 +7,12 @@
 """Bit sequence helpers for JTAG.
 
    BitSequence handle bit manipulation for the JTAG tools.
+
+   To run all tests, use:
+       python3 jtagtools/bits/__init__.py [-v]
+
+   To test a single function, install pytest and use:
+       pytest --doctest-modules jtagtools/bits -k <function>
 """
 
 from typing import Any, Iterable, Union
@@ -342,12 +348,23 @@ class BitSequence:
         b'0ba523'
         >>> hexlify(BitSequence(0xC4A5D01234, 40).to_bytestream(False, False))
         b'c4a5d01234'
+        >>> hexlify(BitSequence(0x51234, 20).to_bytestream(False, False))
+        b'051234'
+        >>> hexlify(BitSequence(0x51234, 21).to_bytestream(False, False))
+        b'051234'
+        >>> hexlify(BitSequence(0x51234, 21).to_bytestream(True, False))
+        b'341205'
+        >>> hexlify(BitSequence(0x51234, 21).to_bytestream(True, True))
+        b'2c48a0'
         """
         out: list[int] = []
         bseq = BitSequence(self)
+        xbitlen = len(bseq) & 7
+        if xbitlen:
+            bseq.push_left([0] * (8 - xbitlen))
         if lsbit:
             bseq.reverse()
-        while bseq._width:
+        while bseq._width > 0:
             out.append(bseq._int & 0xff)
             bseq._int >>= 8
             bseq._width -= 8
